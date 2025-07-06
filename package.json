@@ -1,0 +1,32 @@
+{
+  "name": "flagfit-pro",
+  "version": "1.0.0",
+  "description": "Elite Flag Football Training Platform for Athletes, Coaches, and Admins",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -p 8000 -o",
+    "dev": "http-server -p 8000 -o -c-1",
+    "build": "echo 'Build process would go here'",
+    "test": "echo 'Tests would go here'"
+  },
+  "keywords": [
+    "flag-football",
+    "training",
+    "sports",
+    "pwa",
+    "fitness"
+  ],
+  "author": "FlagFit Pro Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/flagfit-pro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/flagfit-pro/issues"
+  },
+  "homepage": "https://github.com/yourusername/flagfit-pro#readme"
+} 

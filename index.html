@@ -118,58 +118,6 @@
   </div>
 
   <!-- JavaScript -->
-  <script>
-    // Simple role-based dashboard logic
-    function login() {
-      document.getElementById('roleSelect').classList.add('hidden');
-      const role = document.getElementById('role').value;
-      ['athleteDash','coachDash','adminDash'].forEach(id => document.getElementById(id).classList.add('hidden'));
-      if (role === 'athlete') document.getElementById('athleteDash').classList.remove('hidden');
-      if (role === 'coach') document.getElementById('coachDash').classList.remove('hidden');
-      if (role === 'admin') document.getElementById('adminDash').classList.remove('hidden');
-    }
-
-    // GDPR Consent
-    function acceptGDPR() {
-      localStorage.setItem('gdpr', 'accepted');
-      document.getElementById('gdprBanner').style.display = 'none';
-    }
-    function declineGDPR() {
-      localStorage.setItem('gdpr', 'declined');
-      alert('You must accept cookies to use the app.');
-    }
-    if (localStorage.getItem('gdpr') === 'accepted') {
-      document.getElementById('gdprBanner').style.display = 'none';
-    }
-
-    // YouTube API Integration (Public API Key demo, replace with your own for production)
-    const YT_KEY = 'AIzaSyD7...YOUR_KEY_HERE...'; // <-- Replace with your YouTube Data API v3 key
-
-    function searchYT(e, isCoach) {
-      e.preventDefault();
-      const query = isCoach ? document.getElementById('ytQueryCoach').value : document.getElementById('ytQuery').value;
-      const resultsDiv = isCoach ? document.getElementById('ytResultsCoach') : document.getElementById('ytResults');
-      resultsDiv.innerHTML = '<p>Loading...</p>';
-      fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=3&q=${encodeURIComponent(query)}&key=${YT_KEY}`)
-        .then(res => res.json())
-        .then(data => {
-          resultsDiv.innerHTML = '';
-          data.items.forEach(item => {
-            const vid = item.id.videoId;
-            const title = item.snippet.title;
-            resultsDiv.innerHTML += `
-              <div class="yt-embed">
-                <iframe width="100%" height="240" src="https://www.youtube.com/embed/${vid}" 
-                  title="${title}" frameborder="0" allowfullscreen></iframe>
-                <p>${title}</p>
-              </div>
-            `;
-          });
-        })
-        .catch(() => {
-          resultsDiv.innerHTML = '<p>Failed to load videos. Check your API key or try again later.</p>';
-        });
-    }
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
