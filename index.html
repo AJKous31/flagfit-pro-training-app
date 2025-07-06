@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>FlagFit Pro – Flag Football Training App</title>
+  <meta name="description" content="Elite Flag Football Training Platform for Athletes, Coaches, and Admins">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    body { background: #f5f7fa; }
+    .dashboard { max-width: 900px; margin: 2rem auto; }
+    .role-btn { margin: 0 .5rem; }
+    .gdpr-banner {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: #fff; border-top: 1px solid #ddd; padding: 1rem;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 9999;
+    }
+    .yt-embed { aspect-ratio: 16/9; width: 100%; max-width: 480px; margin: 1rem auto; }
+    .card { background: #fff; border-radius: 1rem; box-shadow: 0 2px 8px #0001; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .role-select { margin-bottom: 2rem; }
+    .hidden { display: none !important; }
+    @media (max-width: 600px) {
+      .dashboard { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="dashboard">
+    <header>
+      <h1>🏈 FlagFit Pro</h1>
+      <p>Your all-in-one Flag Football Training Platform</p>
+    </header>
+
+    <!-- Role Selection/Login -->
+    <section class="role-select" id="roleSelect">
+      <label for="role"><b>Login as:</b></label>
+      <select id="role" aria-label="Select your role">
+        <option value="athlete">Athlete</option>
+        <option value="coach">Coach</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button class="role-btn" onclick="login()">Continue</button>
+    </section>
+
+    <!-- Athlete Dashboard -->
+    <section id="athleteDash" class="hidden">
+      <h2>Welcome, Athlete!</h2>
+      <div class="card">
+        <h3>Today's Training</h3>
+        <ul>
+          <li>Dynamic Warm-Up (15 min)</li>
+          <li>Hill Sprints (6×25m)</li>
+          <li>Route Running Drills (20 min)</li>
+          <li>Strength: Nordic Curls, Calf Raises, Glute Bridges</li>
+          <li>Cooldown & Mobility (10 min)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Search Drills (YouTube)</h3>
+        <form id="ytForm" onsubmit="searchYT(event)">
+          <input type="text" id="ytQuery" placeholder="e.g. flag football drills" required>
+          <button type="submit">Search</button>
+        </form>
+        <div id="ytResults"></div>
+      </div>
+    </section>
+
+    <!-- Coach Dashboard -->
+    <section id="coachDash" class="hidden">
+      <h2>Welcome, Coach!</h2>
+      <div class="card">
+        <h3>Team Overview</h3>
+        <ul>
+          <li>Athletes: <span id="athleteCount">12</span></li>
+          <li>Next Session: <span id="nextSession">Tomorrow, 18:00</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Share Drill Video (YouTube)</h3>
+        <form id="ytFormCoach" onsubmit="searchYT(event, true)">
+          <input type="text" id="ytQueryCoach" placeholder="e.g. flag football defense" required>
+          <button type="submit">Search</button>
+        </form>
+        <div id="ytResultsCoach"></div>
+      </div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section id="adminDash" class="hidden">
+      <h2>Welcome, Admin!</h2>
+      <div class="card">
+        <h3>System Stats</h3>
+        <ul>
+          <li>Total Users: 120</li>
+          <li>Active Sessions: 34</li>
+          <li>GDPR Requests: 0</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Manage Content</h3>
+        <button onclick="alert('Feature coming soon!')">Review Drill Submissions</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- GDPR Consent Banner -->
+  <div class="gdpr-banner" id="gdprBanner">
+    <span>
+      This app uses cookies and stores your preferences to enhance your experience. See our <a href="#">Privacy Policy</a>.
+    </span>
+    <div>
+      <button onclick="acceptGDPR()">Accept</button>
+      <button onclick="declineGDPR()">Decline</button>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Simple role-based dashboard logic
+    function login() {
+      document.getElementById('roleSelect').classList.add('hidden');
+      const role = document.getElementById('role').value;
+      ['athleteDash','coachDash','adminDash'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      if (role === 'athlete') document.getElementById('athleteDash').classList.remove('hidden');
+      if (role === 'coach') document.getElementById('coachDash').classList.remove('hidden');
+      if (role === 'admin') document.getElementById('adminDash').classList.remove('hidden');
+    }
+
+    // GDPR Consent
+    function acceptGDPR() {
+      localStorage.setItem('gdpr', 'accepted');
+      document.getElementById('gdprBanner').style.display = 'none';
+    }
+    function declineGDPR() {
+      localStorage.setItem('gdpr', 'declined');
+      alert('You must accept cookies to use the app.');
+    }
+    if (localStorage.getItem('gdpr') === 'accepted') {
+      document.getElementById('gdprBanner').style.display = 'none';
+    }
+
+    // YouTube API Integration (Public API Key demo, replace with your own for production)
+    const YT_KEY = 'AIzaSyD7...YOUR_KEY_HERE...'; // <-- Replace with your YouTube Data API v3 key
+
+    function searchYT(e, isCoach) {
+      e.preventDefault();
+      const query = isCoach ? document.getElementById('ytQueryCoach').value : document.getElementById('ytQuery').value;
+      const resultsDiv = isCoach ? document.getElementById('ytResultsCoach') : document.getElementById('ytResults');
+      resultsDiv.innerHTML = '<p>Loading...</p>';
+      fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=3&q=${encodeURIComponent(query)}&key=${YT_KEY}`)
+        .then(res => res.json())
+        .then(data => {
+          resultsDiv.innerHTML = '';
+          data.items.forEach(item => {
+            const vid = item.id.videoId;
+            const title = item.snippet.title;
+            resultsDiv.innerHTML += `
+              <div class="yt-embed">
+                <iframe width="100%" height="240" src="https://www.youtube.com/embed/${vid}" 
+                  title="${title}" frameborder="0" allowfullscreen></iframe>
+                <p>${title}</p>
+              </div>
+            `;
+          });
+        })
+        .catch(() => {
+          resultsDiv.innerHTML = '<p>Failed to load videos. Check your API key or try again later.</p>';
+        });
+    }
+  </script>
+</body>
+</html>
