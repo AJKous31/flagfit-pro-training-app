@@ -48,10 +48,8 @@ npm run preview
 
 ### 2. Environment Variables (Production)
 ```env
-VITE_SUPABASE_URL=your_production_supabase_url
-VITE_SUPABASE_ANON_KEY=your_production_supabase_anon_key
-VITE_APP_NAME=FlagFit Pro
-VITE_APP_VERSION=2.0.0
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_APP_ENVIRONMENT=production
 VITE_ENABLE_ANALYTICS=true
 VITE_ENABLE_PUSH_NOTIFICATIONS=true
@@ -220,4 +218,4 @@ vercel --prod
 
 ---
 
-**🎉 Congratulations! FlagFit Pro v2.0 is ready for deployment!** 
+**🎉 Congratulations! FlagFit Pro v2.0 is ready for deployment!**
