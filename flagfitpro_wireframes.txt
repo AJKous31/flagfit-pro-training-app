@@ -1,0 +1,140 @@
+FlagFit Pro – Design System & Wireframes
+========================================
+
+1. DESIGN SYSTEM
+----------------
+
+Color Palette:
+- Primary:   #00C853 (Actions, highlights)
+- Navy:      #001B44 (Backgrounds, nav)
+- Accent:    #FF6B6B (Alerts, CTAs)
+- Surface:   #FFFFFF (Cards, modals)
+- Text:      #1A1A1A (Main text)
+- Muted:     #F5F7FA (Background, borders)
+
+Typography:
+- Headings:  Bebas Neue, 18pt+, uppercase, for H1–H3, nav, hero
+- Body:      Montserrat, 16pt+, for paragraphs, UI
+- Badges:    Oswald, 14pt+, uppercase, for labels, badges
+
+Spacing & Sizing:
+- Base spacing: 8px grid
+- Touch targets: min 44x44px
+- Border radius: 20px (cards, buttons)
+- Elevation: 2–8px shadow for cards/modals
+
+Iconography:
+- Style: Simple, bold SVGs, 24x24px, accessible <title>/aria-label
+- Source: Material Icons or custom SVGs
+
+Component Tokens (CSS):
+:root {
+  --color-primary: #00C853;
+  --color-navy: #001B44;
+  --color-accent: #FF6B6B;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1A1A;
+  --color-muted: #F5F7FA;
+  --radius: 20px;
+  --shadow: 0 4px 24px #001B4410;
+  --font-heading: 'Bebas Neue', Arial, sans-serif;
+  --font-body: 'Montserrat', Arial, sans-serif;
+  --font-badge: 'Oswald', Arial, sans-serif;
+}
+
+
+2. WIREFRAMES (TEXT-BASED)
+--------------------------
+
+A. Athlete – Mobile Dashboard
+----------------------------
++------------------------------------------------------+
+|  [Logo]        FlagFit Pro         [Profile Icon]    |
++------------------------------------------------------+
+|  [Today's Training Card]                            |
+|   - Title: "Today's Workout"                        |
+|   - List: Warmup, Drills, Cooldown                  |
++------------------------------------------------------+
+|  [Progress Chart Card]                              |
+|   - Radar/Bar chart: Speed, Agility, Endurance      |
++------------------------------------------------------+
+|  [Drill Library Card]                               |
+|   - Search bar: "Find drills..."                    |
+|   - List: [YouTube video thumbnails]                |
++------------------------------------------------------+
+|  [Bottom Nav: Home | Training | Progress | Team | Me]|
++------------------------------------------------------+
+
+B. Coach – Mobile Dashboard
+--------------------------
++------------------------------------------------------+
+|  [Logo]        FlagFit Pro         [Profile Icon]    |
++------------------------------------------------------+
+|  [Team Roster Card]                                 |
+|   - Table: Name | Position | Status                 |
++------------------------------------------------------+
+|  [Program Management Card]                          |
+|   - Button: "Create Program"                        |
+|   - List: [Program cards, Edit/Delete]              |
++------------------------------------------------------+
+|  [Share Drill Modal]                                |
+|   - Input: YouTube URL                              |
+|   - Button: "Share with Team"                       |
++------------------------------------------------------+
+|  [Bottom Nav: Home | Training | Progress | Team | Me]|
++------------------------------------------------------+
+
+C. Admin – Mobile Dashboard
+--------------------------
++------------------------------------------------------+
+|  [Logo]        FlagFit Pro         [Profile Icon]    |
++------------------------------------------------------+
+|  [User Management Card]                             |
+|   - Table: Name | Role | Status | Actions           |
++------------------------------------------------------+
+|  [GDPR Requests Card]                               |
+|   - Table: Date | User | Type | Status              |
++------------------------------------------------------+
+|  [System Metrics Card]                              |
+|   - List: Total Users, Active Sessions, Errors      |
++------------------------------------------------------+
+|  [Bottom Nav: Home | Users | GDPR | Metrics | Me]   |
++------------------------------------------------------+
+
+D. Desktop Variant (Side Rail Nav)
+----------------------------------
++----------------+-------------------------------------+
+| [Nav: vertical]| [Main content: as above, wider]     |
+| Home           |                                     |
+| Training       |                                     |
+| Progress       |                                     |
+| Team/Users     |                                     |
+| Me             |                                     |
++----------------+-------------------------------------+
+
+E. Key Component Wireframes
+---------------------------
+Button:
++----------------------+
+|  [  PRIMARY ACTION ] |
++----------------------+
+
+Card:
++------------------------------+
+|  [Title]                     |
+|  [Content]                   |
++------------------------------+
+
+Modal:
++------------------------------+
+|  [X]  [Modal Title]          |
+|  [Form/Input/Content]        |
+|  [Primary]   [Secondary]     |
++------------------------------+
+
+Accessibility Notes:
+--------------------
+- All interactive elements: tabindex="0", visible focus ring.
+- All icons: <svg aria-label="..."> or <span class="sr-only">...</span>
+- Color contrast: All text on backgrounds ≥ 4.5:1.
+- Text resizes up to 200% without breaking layout. 
