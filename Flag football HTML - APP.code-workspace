@@ -2,6 +2,21 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "database"
+		},
+		{
+			"path": "docs"
+		},
+		{
+			"path": "icons"
+		},
+		{
+			"path": "screenshots"
+		},
+		{
+			"path": "src"
 		}
 	]
 }

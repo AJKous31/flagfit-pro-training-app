@@ -352,6 +352,20 @@ CREATE TABLE IF NOT EXISTS athlete_questionnaires (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Analytics Events Table
+CREATE TABLE IF NOT EXISTS analytics_events (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    event_name VARCHAR(100) NOT NULL,
+    user_id VARCHAR(100) NOT NULL,
+    session_id VARCHAR(100),
+    test_mode VARCHAR(10),
+    user_agent TEXT,
+    screen_size VARCHAR(50),
+    event_data JSONB NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Indexes for performance
 CREATE INDEX idx_exercises_category ON exercises(category_id);
 CREATE INDEX idx_exercises_difficulty ON exercises(difficulty_level);
@@ -390,6 +404,7 @@ ALTER TABLE wellness_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE training_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE training_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recovery_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
 -- Users can read their own data
 CREATE POLICY "Users can view own profile" ON users
@@ -537,6 +552,19 @@ CREATE POLICY "Everyone can view recovery routines" ON recovery_routines
 -- Everyone can view recovery exercises (public data)
 CREATE POLICY "Everyone can view recovery exercises" ON recovery_exercises
     FOR SELECT USING (true);
+
+-- Analytics events policies
+CREATE POLICY "Users can insert their own analytics events" ON analytics_events
+    FOR INSERT WITH CHECK (user_id = auth.uid()::text);
+
+CREATE POLICY "Admins can view all analytics events" ON analytics_events
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM users 
+            WHERE users.id = auth.uid() 
+            AND users.role = 'admin'
+        )
+    );
 
 -- Create triggers for updated_at timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
