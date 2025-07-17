@@ -1,42 +1,22 @@
 {
-  "name": "flagfit-pro-monorepo",
+  "name": "flagfit-pro-training-app",
   "version": "1.0.0",
-  "description": "FlagFit Pro - Complete Flag Football Training Platform",
+  "description": "FlagFit Pro - Flag Football Training Platform with React + PocketBase",
   "type": "module",
   "private": true,
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.0",
-    "artillery": "^2.0.23",
-    "husky": "^9.1.7",
-    "jsdom": "^26.1.0",
-    "lint-staged": "^16.1.2",
-    "prettier": "^3.4.2",
-    "vitest": "^3.2.4"
-  },
   "scripts": {
     "prepare": "husky",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start": "node server.js",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "lint:main": "eslint server.js src/",
-    "lint:frontend": "cd react-flagfootball-app && npm run lint",
-    "lint:fix": "npm run lint:fix:main && npm run lint:fix:frontend",
-    "lint:fix:main": "eslint server.js src/ --fix",
-    "lint:fix:frontend": "cd react-flagfootball-app && npm run lint --fix",
+    "dev": "cd react-flagfootball-app && npm run dev",
+    "build": "cd react-flagfootball-app && npm run build",
+    "preview": "cd react-flagfootball-app && npm run preview",
+    "lint": "cd react-flagfootball-app && npm run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:main": "node --test",
-    "test:frontend": "cd react-flagfootball-app && npm run test",
+    "test": "cd react-flagfootball-app && npm run test",
+    "pocketbase": "./pocketbase serve --dev --dir=./pb_data",
     "stress-test": "artillery run stress-test.yml",
     "stress-test:pocketbase": "artillery run pocketbase-stress-test.yml",
     "stress-test:frontend": "artillery run frontend-stress-test.yml",
-    "stress-test:all": "npm run stress-test && npm run stress-test:pocketbase && npm run stress-test:frontend",
-    "stress-test:report": "artillery run stress-test.yml --output stress-test-report.json && artillery report stress-test-report.json",
     "audit": "npm audit"
   },
   "lint-staged": {
@@ -47,15 +27,12 @@
       "prettier --write"
     ]
   },
+  "devDependencies": {
+    "artillery": "^2.0.23",
+    "husky": "^9.1.7",
+    "prettier": "^3.4.2"
+  },
   "dependencies": {
-    "compression": "^1.8.0",
-    "cors": "^2.8.5",
-    "csrf-csrf": "^4.0.3",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.1",
-    "helmet": "^8.1.0",
-    "joi": "^17.13.3",
-    "pocketbase": "^0.26.1",
-    "socket.io": "^4.8.1"
+    "pocketbase": "^0.26.1"
   }
 }
