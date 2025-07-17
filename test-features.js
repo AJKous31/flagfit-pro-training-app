@@ -1,90 +1,195 @@
-// Flag Football Training App - Feature Testing Script
-// Run this in the browser console to test new features
+// Test Features for FlagFit Pro
+// This file contains test functions to verify various features
 
-console.log('🧪 Flag Football Training App - Feature Testing');
-console.log('=============================================');
+// Environment variables to check
+const requiredEnvVars = [
+  'VITE_POCKETBASE_URL'
+]
 
-// Test 1: Check if stores are available
-console.log('\n📦 Testing Pinia Stores...');
-try {
-  // This will be available after the app loads
-  console.log('✅ Stores should be available in the app');
-} catch (error) {
-  console.log('❌ Stores not available:', error);
+// Check if environment variables are properly set
+function checkEnvironmentVariables() {
+  console.log('🔍 Checking environment variables...')
+  
+  requiredEnvVars.forEach(varName => {
+    const value = import.meta.env[varName]
+    if (value && value !== 'http://127.0.0.1:8090') {
+      console.log(`✅ ${varName}: ${value}`)
+    } else {
+      console.warn(`⚠️  ${varName}: Not set or using default value`)
+    }
+  })
 }
 
-// Test 2: Check if components are loaded
-console.log('\n🧩 Testing Components...');
-const components = [
-  'WellnessTracker',
-  'DailySessionView', 
-  'WeeklyScheduleView',
-  'ProgressIndicator',
-  'ContextMenu',
-  'PullToRefresh',
-  'ProgressRing',
-  'Breadcrumbs'
-];
-
-components.forEach(component => {
-  console.log(`✅ ${component} component should be available`);
-});
-
-// Test 3: Check environment variables
-console.log('\n🔧 Testing Environment Variables...');
-const envVars = [
-  'VITE_SUPABASE_URL',
-  'VITE_SUPABASE_ANON_KEY',
-  'VITE_APP_NAME',
-  'VITE_APP_VERSION'
-];
-
-envVars.forEach(varName => {
-  const value = import.meta.env[varName];
-  if (value && value !== 'your_supabase_project_url' && value !== 'your_supabase_anon_key') {
-    console.log(`✅ ${varName}: ${value}`);
-  } else {
-    console.log(`⚠️  ${varName}: Not configured`);
+// Test PocketBase connection
+async function testPocketBaseConnection() {
+  console.log('🔍 Testing PocketBase connection...')
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_POCKETBASE_URL}/api/health`)
+    if (response.ok) {
+      console.log('✅ PocketBase connection successful')
+    } else {
+      console.error('❌ PocketBase connection failed')
+    }
+  } catch (error) {
+    console.error('❌ PocketBase connection error:', error.message)
   }
-});
+}
 
-// Test 4: Check API service
-console.log('\n🌐 Testing API Service...');
-console.log('✅ API service should be available in src/services/api.js');
+// Test authentication
+async function testAuthentication() {
+  console.log('🔍 Testing authentication...')
+  
+  try {
+    // Test with PocketBase service
+    const { pocketbaseService } = await import('./src/services/pocketbase.service.js')
+    
+    // Test signup
+    console.log('1. Run: pocketbaseService.signUp({ email: "test@example.com", password: "password123", name: "Test User" })')
+    
+    // Test signin
+    console.log('2. Run: pocketbaseService.signIn("test@example.com", "password123")')
+    
+    // Test get current user
+    console.log('3. Run: pocketbaseService.getCurrentUser()')
+    
+    console.log('✅ Authentication tests ready')
+  } catch (error) {
+    console.error('❌ Authentication test setup failed:', error.message)
+  }
+}
 
-// Test 5: Check database connection
-console.log('\n🗄️  Testing Database Connection...');
-console.log('To test database connection:');
-console.log('1. Open browser console');
-console.log('2. Run: window.supabase.auth.getSession()');
-console.log('3. Check for any connection errors');
+// Test database operations
+async function testDatabaseOperations() {
+  console.log('🔍 Testing database operations...')
+  
+  try {
+    const { pocketbaseService } = await import('./src/services/pocketbase.service.js')
+    
+    console.log('1. Run: pocketbaseService.create("training_sessions", { title: "Test Session", duration: 60 })')
+    console.log('2. Run: pocketbaseService.getList("training_sessions")')
+    console.log('3. Run: pocketbaseService.update("session_id", { title: "Updated Session" })')
+    console.log('4. Run: pocketbaseService.delete("training_sessions", "session_id")')
+    
+    console.log('✅ Database operation tests ready')
+  } catch (error) {
+    console.error('❌ Database operation test setup failed:', error.message)
+  }
+}
 
-// Test 6: Feature checklist
-console.log('\n✅ Feature Checklist:');
-const features = [
-  '✅ Wellness Tracker Component',
-  '✅ Daily Session View',
-  '✅ Weekly Schedule View', 
-  '✅ Pinia Stores (Auth & Training)',
-  '✅ API Service Layer',
-  '✅ Database Schema v2',
-  '✅ Sample Data',
-  '✅ Offline Support',
-  '✅ Real-time Updates',
-  '✅ Progress Tracking',
-  '✅ Recovery Routines',
-  '✅ Performance Metrics'
-];
+// Test real-time features
+async function testRealTimeFeatures() {
+  console.log('🔍 Testing real-time features...')
+  
+  try {
+    const { pocketbaseService } = await import('./src/services/pocketbase.service.js')
+    
+    console.log('1. Run: pocketbaseService.subscribe("training_sessions", (data) => console.log("Real-time update:", data))')
+    console.log('2. Check database connection in PocketBase admin panel')
+    
+    console.log('✅ Real-time feature tests ready')
+  } catch (error) {
+    console.error('❌ Real-time feature test setup failed:', error.message)
+  }
+}
 
-features.forEach(feature => console.log(feature));
+// Test file upload
+async function testFileUpload() {
+  console.log('🔍 Testing file upload...')
+  
+  try {
+    const { pocketbaseService } = await import('./src/services/pocketbase.service.js')
+    
+    console.log('1. Create a test file: const file = new File(["test content"], "test.txt", { type: "text/plain" })')
+    console.log('2. Run: pocketbaseService.uploadFile(file)')
+    
+    console.log('✅ File upload tests ready')
+  } catch (error) {
+    console.error('❌ File upload test setup failed:', error.message)
+  }
+}
 
-console.log('\n🎯 Testing Instructions:');
-console.log('1. Start the dev server: npm run dev');
-console.log('2. Open browser and navigate to the app');
-console.log('3. Check browser console for any errors');
-console.log('4. Test the Wellness Tracker in Athlete Dashboard');
-console.log('5. Verify all components load correctly');
-console.log('6. Test offline functionality');
-console.log('7. Check database connection in Supabase dashboard');
+// Test caching
+async function testCaching() {
+  console.log('�� Testing caching...')
+  
+  try {
+    const cacheService = await import('./src/services/cache.service.js')
+    
+    console.log('1. Run: cacheService.set("test-key", "test-value", 60000)')
+    console.log('2. Run: cacheService.get("test-key")')
+    console.log('3. Run: cacheService.invalidate("test-key")')
+    
+    console.log('✅ Caching tests ready')
+  } catch (error) {
+    console.error('❌ Caching test setup failed:', error.message)
+  }
+}
 
-console.log('\n🚀 Ready for testing!'); 
+// Test service container
+async function testServiceContainer() {
+  console.log('🔍 Testing service container...')
+  
+  try {
+    const { container } = await import('./src/services/container.js')
+    
+    console.log('1. Run: container.resolve("pocketbase")')
+    console.log('2. Run: container.resolve("config")')
+    console.log('3. Run: container.getServiceNames()')
+    
+    console.log('✅ Service container tests ready')
+  } catch (error) {
+    console.error('❌ Service container test setup failed:', error.message)
+  }
+}
+
+// Run all tests
+async function runAllTests() {
+  console.log('🚀 Starting FlagFit Pro feature tests...\n')
+  
+  checkEnvironmentVariables()
+  console.log('')
+  
+  await testPocketBaseConnection()
+  console.log('')
+  
+  testAuthentication()
+  console.log('')
+  
+  testDatabaseOperations()
+  console.log('')
+  
+  testRealTimeFeatures()
+  console.log('')
+  
+  testFileUpload()
+  console.log('')
+  
+  testCaching()
+  console.log('')
+  
+  testServiceContainer()
+  console.log('')
+  
+  console.log('🎉 All tests are ready to run!')
+  console.log('💡 Use the console commands above to test each feature.')
+}
+
+// Export test functions
+export {
+  checkEnvironmentVariables,
+  testPocketBaseConnection,
+  testAuthentication,
+  testDatabaseOperations,
+  testRealTimeFeatures,
+  testFileUpload,
+  testCaching,
+  testServiceContainer,
+  runAllTests
+}
+
+// Auto-run tests if this file is executed directly
+if (typeof window !== 'undefined') {
+  window.runAllTests = runAllTests
+  console.log('🧪 Test functions loaded. Run window.runAllTests() to start testing.')
+} 

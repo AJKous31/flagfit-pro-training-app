@@ -1,0 +1,59 @@
+config:
+  target: 'http://localhost:5173'  # Vite dev server default port
+  phases:
+    - duration: 30
+      arrivalRate: 10
+      name: "Frontend warm up"
+    - duration: 60
+      arrivalRate: 25
+      name: "Normal user load"
+    - duration: 30
+      arrivalRate: 50
+      name: "Heavy frontend load"
+  http:
+    timeout: 30
+  processor: ./frontend-stress-processor.js
+
+scenarios:
+  - name: "React App Loading"
+    weight: 40
+    flow:
+      - get:
+          url: "/"
+          capture:
+            - regexp: "<title>(.*)</title>"
+              as: "pageTitle"
+      - get:
+          url: "/vite.svg"
+      - think: 2
+
+  - name: "Route Navigation Simulation"
+    weight: 30
+    flow:
+      - get:
+          url: "/"
+      - get:
+          url: "/login"
+      - get:
+          url: "/register"
+      - get:
+          url: "/dashboard"
+      - think: 1
+
+  - name: "Asset Loading Test"
+    weight: 20
+    flow:
+      - get:
+          url: "/src/main.jsx"
+      - get:
+          url: "/src/index.css"
+      - get:
+          url: "/src/App.jsx"
+
+  - name: "API Integration Test"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200

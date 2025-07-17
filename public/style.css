@@ -1,0 +1,68 @@
+/* style.css - FlagFit Pro custom styles */
+
+:root {
+  --primary-color: #21808D;
+  --secondary-color: #E8F4F8;
+  --accent-color: #FF6B6B;
+  --glass-bg: rgba(255,255,255,0.15);
+  --glass-blur: 12px;
+  --border-radius: 1rem;
+  --shadow: 0 4px 32px rgba(33,128,141,0.08);
+}
+
+body {
+  background: linear-gradient(135deg, #e8f4f8 0%, #21808d 100%);
+  min-height: 100vh;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(33,128,141,0.12);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-spinner .spinner {
+  width: 48px;
+  height: 48px;
+  border: 6px solid #e8f4f8;
+  border-top: 6px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden { display: none !important; }
+
+/* Responsive grid for dashboard */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Theme toggle, notification, and GDPR styles can be expanded as needed */ 

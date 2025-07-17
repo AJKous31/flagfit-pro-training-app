@@ -251,8 +251,16 @@ function validateForm() {
   
   if (!form.password) {
     errors.password = 'Password is required'
-  } else if (form.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters'
+  } else if (form.password.length < 8) {
+    errors.password = 'Password must be at least 8 characters'
+  } else if (!/[A-Z]/.test(form.password)) {
+    errors.password = 'Password must contain at least one uppercase letter'
+  } else if (!/[a-z]/.test(form.password)) {
+    errors.password = 'Password must contain at least one lowercase letter'
+  } else if (!/\d/.test(form.password)) {
+    errors.password = 'Password must contain at least one number'
+  } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(form.password)) {
+    errors.password = 'Password must contain at least one special character'
   }
   
   if (!form.confirmPassword) {
@@ -340,7 +348,8 @@ function generateRecommendations(intensity, data) {
 }
 
 async function logEngagement(accepted) {
-  await fetch('http://localhost:3001/api/athlete/recommendation', {
+          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+        await fetch(`${API_BASE_URL}/api/athlete/recommendation`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

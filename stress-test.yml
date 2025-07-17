@@ -1,0 +1,52 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 50
+      name: "Moderate load"
+    - duration: 60
+      arrivalRate: 100
+      name: "High load"
+    - duration: 30
+      arrivalRate: 200
+      name: "Stress test"
+  http:
+    timeout: 30
+  processor: ./stress-test-processor.js
+
+scenarios:
+  - name: "Health Check Stress"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/health"
+          capture:
+            - json: "$.status"
+              as: "healthStatus"
+
+  - name: "Static File Load"
+    weight: 20
+    flow:
+      - get:
+          url: "/"
+      - get:
+          url: "/static/js/main.js"
+      - get:
+          url: "/static/css/main.css"
+
+  - name: "Socket.io Connection Test"
+    weight: 15
+    flow:
+      - get:
+          url: "/socket.io/?EIO=4&transport=polling"
+
+  - name: "Rate Limit Test"
+    weight: 35
+    flow:
+      - loop:
+          - get:
+              url: "/api/health"
+        count: 10

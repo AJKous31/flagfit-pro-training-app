@@ -130,7 +130,7 @@ class FlagFitApp {
     const query = queryInput.value.trim();
     if (!query) return;
 
-    resultsDiv.innerHTML = '<p>Loading...</p>';
+    resultsDiv.textContent = 'Loading...';
 
     try {
       // For demo purposes, show mock results
@@ -154,18 +154,30 @@ class FlagFitApp {
       mockResults.forEach(item => {
         const vid = item.id.videoId;
         const title = item.snippet.title;
-        resultsDiv.innerHTML += `
-          <div class="yt-embed">
-            <iframe width="100%" height="240" src="https://www.youtube.com/embed/${vid}" 
-              title="${title}" frameborder="0" allowfullscreen></iframe>
-            <p>${title}</p>
-          </div>
-        `;
+        
+        // Create elements safely
+        const div = document.createElement('div');
+        div.className = 'yt-embed';
+        
+        const iframe = document.createElement('iframe');
+        iframe.width = '100%';
+        iframe.height = '240';
+        iframe.src = `https://www.youtube.com/embed/${vid}`;
+        iframe.title = title;
+        iframe.frameBorder = '0';
+        iframe.allowFullscreen = true;
+        
+        const p = document.createElement('p');
+        p.textContent = title;
+        
+        div.appendChild(iframe);
+        div.appendChild(p);
+        resultsDiv.appendChild(div);
       });
 
     } catch (error) {
       console.error('YouTube search error:', error);
-      resultsDiv.innerHTML = '<p>Failed to load videos. Please try again later.</p>';
+      resultsDiv.textContent = 'Failed to load videos. Please try again later.';
     }
   }
 

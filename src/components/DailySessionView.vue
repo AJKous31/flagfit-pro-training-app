@@ -43,6 +43,17 @@
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
         
+        <div v-else-if="error" class="text-center py-8 text-red-500">
+          <div class="text-4xl mb-2">⚠️</div>
+          <p>{{ error }}</p>
+          <button 
+            @click="loadSession"
+            class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+        
         <div v-else-if="session?.session_exercises?.length" class="space-y-4">
           <div 
             v-for="(exercise, index) in session.session_exercises" 
@@ -112,15 +123,16 @@
     <!-- Action Buttons -->
     <div class="mt-6 flex space-x-4">
       <button 
-        @click="$emit('start-session')"
+        @click="handleStartSession"
         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-        :disabled="!session?.session_exercises?.length"
+        :disabled="!session?.session_exercises?.length || startingSession"
       >
         <span class="flex items-center justify-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg v-if="!startingSession" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          Start Session
+          <div v-else class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+          {{ startingSession ? 'Starting...' : 'Start Session' }}
         </span>
       </button>
       
@@ -141,6 +153,8 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { useTraining } from '@/composables/useTraining.js'
+import { useAuthStore } from '@/stores/auth.js'
 
 const props = defineProps({
   weeklyTemplateId: {
@@ -156,21 +170,47 @@ const props = defineProps({
 const emit = defineEmits(['start-session', 'edit-session'])
 
 const session = ref(null)
-const loading = ref(false)
+const startingSession = ref(false)
 
-// Import API methods
-import { getDailySessionTemplate } from '@/services/api.js'
+// Use training composable
+const { loading, error, startSession } = useTraining()
+const authStore = useAuthStore()
 
 const loadSession = async () => {
   if (!props.weeklyTemplateId || !props.dayOfWeek) return
   
-  loading.value = true
   try {
-    session.value = await getDailySessionTemplate(props.weeklyTemplateId, props.dayOfWeek)
+    // This would need to be implemented in the training service
+    // For now, using a placeholder approach
+    const sessionData = {
+      id: props.weeklyTemplateId,
+      session_name: `${getDayOfWeek(props.dayOfWeek)} Session`,
+      day_of_week: props.dayOfWeek,
+      total_duration_minutes: 60,
+      intensity_level: 'moderate',
+      session_type: 'strength_power',
+      session_exercises: []
+    }
+    
+    session.value = sessionData
   } catch (error) {
     console.error('Error loading daily session:', error)
+  }
+}
+
+const handleStartSession = async () => {
+  if (!session.value || !authStore.user?.id) return
+  
+  startingSession.value = true
+  try {
+    const result = await startSession(session.value, authStore.user.id)
+    if (result.success) {
+      emit('start-session', result.session)
+    }
+  } catch (error) {
+    console.error('Error starting session:', error)
   } finally {
-    loading.value = false
+    startingSession.value = false
   }
 }
 
@@ -200,31 +240,25 @@ const getSessionTypeLabel = (type) => {
   return types[type] || type
 }
 
-const getIntensityBadge = (level) => {
+const getIntensityBadge = (intensity) => {
   const badges = {
-    low: '🟢 Low',
-    moderate: '🟡 Moderate', 
-    high: '🟠 High',
-    very_high: '🔴 Very High'
+    low: '🟢',
+    moderate: '🟡',
+    high: '🔴'
   }
-  return badges[level] || level
+  return badges[intensity] || '⚪'
 }
 
 const getIntensityColor = (percentage) => {
-  if (percentage >= 90) return 'bg-red-100 text-red-800'
-  if (percentage >= 80) return 'bg-orange-100 text-orange-800'
-  if (percentage >= 70) return 'bg-yellow-100 text-yellow-800'
-  if (percentage >= 60) return 'bg-green-100 text-green-800'
-  return 'bg-gray-100 text-gray-800'
+  if (percentage >= 80) return 'bg-red-100 text-red-800'
+  if (percentage >= 60) return 'bg-yellow-100 text-yellow-800'
+  return 'bg-green-100 text-green-800'
 }
 
-onMounted(() => {
-  loadSession()
-})
+// Load session when props change
+watch(() => [props.weeklyTemplateId, props.dayOfWeek], loadSession, { immediate: true })
 
-watch([() => props.weeklyTemplateId, () => props.dayOfWeek], () => {
-  loadSession()
-})
+onMounted(loadSession)
 </script>
 
 <style scoped>

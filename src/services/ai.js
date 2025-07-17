@@ -1,5 +1,6 @@
 export async function predictIntensity(payload) {
-  const response = await fetch('http://localhost:8080/api/v1/predict/intensity', {
+  const AI_SERVICE_URL = import.meta.env.VITE_AI_SERVICE_URL || 'http://localhost:8080';
+const response = await fetch(`${AI_SERVICE_URL}/api/v1/predict/intensity`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

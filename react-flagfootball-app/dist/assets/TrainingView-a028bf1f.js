@@ -1,0 +1,2 @@
+import{j as s}from"./query-73861c9c.js";import"./vendor-2fbe36df.js";const i=()=>s.jsx("div",{className:"min-h-screen bg-gray-50 p-6",children:s.jsxs("div",{className:"max-w-7xl mx-auto",children:[s.jsx("h1",{className:"text-3xl font-bold text-gray-900 mb-6",children:"Training"}),s.jsx("div",{className:"card",children:s.jsx("p",{className:"text-gray-600",children:"Training view coming soon..."})})]})});export{i as default};
+//# sourceMappingURL=TrainingView-a028bf1f.js.map

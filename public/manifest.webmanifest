@@ -1,0 +1,94 @@
+{
+  "name": "FlagFit Pro - Elite Flag Football Training",
+  "short_name": "FlagFit Pro",
+  "description": "Advanced flag football training platform with personalized programs, performance tracking, and coaching tools",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FCFCF9",
+  "theme_color": "#21808D",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["sports", "fitness", "training", "education"],
+  "icons": [
+    { "src": "/icons/icon-72x72.png", "sizes": "72x72", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-128x128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-152x152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-384x384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "/screenshots/desktop-home.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "FlagFit Pro Desktop Dashboard" },
+    { "src": "/screenshots/desktop-training.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "Training Programs Interface" },
+    { "src": "/screenshots/mobile-home.png", "sizes": "375x812", "type": "image/png", "form_factor": "narrow", "label": "FlagFit Pro Mobile Dashboard" },
+    { "src": "/screenshots/mobile-stats.png", "sizes": "375x812", "type": "image/png", "form_factor": "narrow", "label": "Performance Statistics" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Training",
+      "short_name": "Train",
+      "description": "Jump directly to training programs",
+      "url": "/training",
+      "icons": [
+        { "src": "/icons/shortcut-training.png", "sizes": "96x96", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "View Stats",
+      "short_name": "Stats",
+      "description": "Check your performance statistics",
+      "url": "/stats",
+      "icons": [
+        { "src": "/icons/shortcut-stats.png", "sizes": "96x96", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Training Videos",
+      "short_name": "Videos",
+      "description": "Watch instructional videos",
+      "url": "/videos",
+      "icons": [
+        { "src": "/icons/shortcut-videos.png", "sizes": "96x96", "type": "image/png" }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "protocol_handlers": [
+    {
+      "protocol": "web+flagfit",
+      "url": "/?action=%s"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/open-training-file",
+      "accept": {
+        "application/json": [".flagfit", ".training"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/share-training",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "trainingData",
+          "accept": ["application/json", "text/plain"]
+        }
+      ]
+    }
+  }
+} 

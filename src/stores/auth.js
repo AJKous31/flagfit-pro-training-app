@@ -1,216 +1,223 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { supabase } from '@/services/api.js'
+import { reactive, computed } from 'vue'
+import { pocketbaseService } from '../services/pocketbase.service.js'
 
-export const useAuthStore = defineStore('auth', () => {
-  // State
-  const user = ref(null)
-  const profile = ref(null)
-  const token = ref(localStorage.getItem('auth_token'))
-  const refreshToken = ref(localStorage.getItem('refresh_token'))
-  const isAuthenticated = ref(false)
-  const permissions = ref([])
-  const loading = ref(false)
+// Auth Store
+export const useAuthStore = () => {
+  const state = reactive({
+    user: null,
+    loading: false,
+    error: null,
+    isAuthenticated: false
+  })
 
-  // Getters
-  const isCoach = computed(() => user.value?.role === 'coach')
-  const isAdmin = computed(() => user.value?.role === 'admin')
-  const isAthlete = computed(() => user.value?.role === 'athlete')
-  const hasPermission = computed(() => (permission) => permissions.value.includes(permission))
+  // Computed properties
+  const user = computed(() => state.user)
+  const loading = computed(() => state.loading)
+  const error = computed(() => state.error)
+  const isAuthenticated = computed(() => state.isAuthenticated)
 
   // Actions
-  async function login(credentials) {
-    loading.value = true
+  const setLoading = (loading) => {
+    state.loading = loading
+  }
+
+  const setError = (error) => {
+    state.error = error
+    setTimeout(() => {
+      state.error = null
+    }, 5000)
+  }
+
+  const setUser = (user) => {
+    state.user = user
+    state.isAuthenticated = !!user
+  }
+
+  const register = async (userData) => {
+    setLoading(true)
+    setError(null)
+    
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
-        password: credentials.password
+      const result = await pocketbaseService.signUp(userData)
+      setUser(result.user)
+      return result
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const login = async (credentials) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const result = await pocketbaseService.signIn(credentials.email, credentials.password)
+      setUser(result.user)
+      return result
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const logout = async () => {
+    setLoading(true)
+    
+    try {
+      await pocketbaseService.signOut()
+      setUser(null)
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getCurrentUser = async () => {
+    setLoading(true)
+    
+    try {
+      const user = await pocketbaseService.getCurrentUser()
+      setUser(user)
+      return user
+    } catch (error) {
+      setError(error.message)
+      setUser(null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const updateProfile = async (profileData) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const result = await pocketbaseService.updateProfile(profileData)
+      setUser(result.user)
+      return result
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const changePassword = async (passwordData) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const result = await pocketbaseService.updateProfile({
+        password: passwordData.newPassword,
+        passwordConfirm: passwordData.newPassword
       })
-
-      if (error) throw error
-
-      await setAuth(data)
-      await fetchProfile()
-      
-      return { success: true }
+      return result
     } catch (error) {
-      console.error('Login error:', error)
-      return { success: false, error: error.message }
+      setError(error.message)
+      throw error
     } finally {
-      loading.value = false
+      setLoading(false)
     }
   }
 
-  async function register(userData) {
-    loading.value = true
+  const forgotPassword = async (email) => {
+    setLoading(true)
+    setError(null)
+    
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            role: userData.role,
-            team_id: userData.teamId
-          }
-        }
-      })
-
-      if (error) throw error
-
-      await setAuth(data)
-      await fetchProfile()
-      
-      return { success: true }
+      await pocketbaseService.pb.collection('_pb_users_auth_').requestPasswordReset(email)
     } catch (error) {
-      console.error('Registration error:', error)
-      return { success: false, error: error.message }
+      setError(error.message)
+      throw error
     } finally {
-      loading.value = false
+      setLoading(false)
     }
   }
 
-  async function setAuth(authData) {
-    user.value = authData.user
-    token.value = authData.session?.access_token
-    refreshToken.value = authData.session?.refresh_token
-    isAuthenticated.value = !!authData.user
-
-    if (token.value) {
-      localStorage.setItem('auth_token', token.value)
-    }
-    if (refreshToken.value) {
-      localStorage.setItem('refresh_token', refreshToken.value)
-    }
-
-    // Set permissions based on role
-    if (user.value?.role === 'admin') {
-      permissions.value = ['read:all', 'write:all', 'delete:all']
-    } else if (user.value?.role === 'coach') {
-      permissions.value = ['read:team', 'write:team', 'read:programs']
-    } else if (user.value?.role === 'athlete') {
-      permissions.value = ['read:own', 'write:own', 'read:programs']
-    }
-  }
-
-  async function fetchProfile() {
-    if (!user.value) return
-
+  const resetPassword = async (resetData) => {
+    setLoading(true)
+    setError(null)
+    
     try {
-      const { data, error } = await supabase
-        .from('athlete_profiles')
-        .select('*')
-        .eq('user_id', user.value.id)
-        .single()
-
-      if (error && error.code !== 'PGRST116') throw error
-      
-      profile.value = data
+      await pocketbaseService.pb.collection('_pb_users_auth_').confirmPasswordReset(
+        resetData.token,
+        resetData.newPassword,
+        resetData.newPassword
+      )
     } catch (error) {
-      console.error('Error fetching profile:', error)
-    }
-  }
-
-  async function updateProfile(profileData) {
-    if (!user.value) return
-
-    try {
-      const { data, error } = await supabase
-        .from('athlete_profiles')
-        .upsert({
-          user_id: user.value.id,
-          ...profileData
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      
-      profile.value = data
-      return { success: true, data }
-    } catch (error) {
-      console.error('Error updating profile:', error)
-      return { success: false, error: error.message }
-    }
-  }
-
-  async function logout() {
-    try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-    } catch (error) {
-      console.error('Logout error:', error)
+      setError(error.message)
+      throw error
     } finally {
-      clearAuth()
+      setLoading(false)
     }
   }
 
-  function clearAuth() {
-    user.value = null
-    profile.value = null
-    token.value = null
-    refreshToken.value = null
-    isAuthenticated.value = false
-    permissions.value = []
-
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('refresh_token')
-  }
-
-  async function refreshSession() {
+  const verifyEmail = async (token) => {
+    setLoading(true)
+    setError(null)
+    
     try {
-      const { data, error } = await supabase.auth.refreshSession()
-      if (error) throw error
-      
-      await setAuth(data)
-      return { success: true }
+      await pocketbaseService.pb.collection('_pb_users_auth_').confirmVerification(token)
     } catch (error) {
-      console.error('Session refresh error:', error)
-      clearAuth()
-      return { success: false, error: error.message }
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
     }
   }
 
-  async function checkAuth() {
+  const refreshSession = async () => {
     try {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error) throw error
-
-      if (session) {
-        await setAuth({ user: session.user, session })
-        await fetchProfile()
-      }
+      const authData = await pocketbaseService.pb.collection('_pb_users_auth_').authRefresh()
+      setUser(authData.record)
+      return authData
     } catch (error) {
-      console.error('Auth check error:', error)
-      clearAuth()
+      setUser(null)
+      throw error
     }
   }
 
   // Initialize auth state
-  checkAuth()
+  const init = async () => {
+    try {
+      const user = await pocketbaseService.getCurrentUser()
+      setUser(user)
+    } catch (error) {
+      console.error('Auth initialization error:', error)
+      setUser(null)
+    }
+  }
 
   return {
     // State
-    user: computed(() => user.value),
-    profile: computed(() => profile.value),
-    token: computed(() => token.value),
-    isAuthenticated: computed(() => isAuthenticated.value),
-    permissions: computed(() => permissions.value),
-    loading: computed(() => loading.value),
-
-    // Getters
-    isCoach,
-    isAdmin,
-    isAthlete,
-    hasPermission,
-
+    user,
+    loading,
+    error,
+    isAuthenticated,
+    
     // Actions
-    login,
     register,
+    login,
     logout,
+    getCurrentUser,
     updateProfile,
+    changePassword,
+    forgotPassword,
+    resetPassword,
+    verifyEmail,
     refreshSession,
-    checkAuth
+    init,
+    
+    // Utilities
+    setLoading,
+    setError,
+    setUser
   }
-}) 
+} 

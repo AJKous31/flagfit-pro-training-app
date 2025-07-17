@@ -1,125 +1,104 @@
-import 'dotenv/config';
-import express from 'express';
-import { Pool } from 'pg';
-import cors from 'cors';
-import morgan from 'morgan';
-const app = express();
+import express from 'express'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
+import cors from 'cors'
+import helmet from 'helmet'
+import compression from 'compression'
+import rateLimit from 'express-rate-limit'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
 
-// Middleware
-app.use(express.json());
-app.use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:5173', credentials: true }));
-app.use(morgan('dev'));
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
-// Postgres connection
-const pool = new Pool({
-  user: process.env.PGUSER || 'postgres',
-  host: process.env.PGHOST || 'localhost',
-  database: process.env.PGDATABASE || 'flagfit',
-  password: process.env.PGPASSWORD || '',
-  port: process.env.PGPORT ? parseInt(process.env.PGPORT) : 5432,
-});
-
-// Helper: Validate athlete data
-function validateAthleteData(d) {
-  if (!d.athlete_id || !d.log_date) return 'Missing athlete_id or log_date';
-  if (typeof d.equipment_available !== 'boolean') return 'equipment_available must be boolean';
-  if (d.rpe_score && (d.rpe_score < 1 || d.rpe_score > 10)) return 'rpe_score out of range';
-  return null;
-}
-
-// Log athlete data
-app.post('/api/athlete/data', async (req, res) => {
-  try {
-    const d = req.body;
-    const validationError = validateAthleteData(d);
-    if (validationError) return res.status(400).json({ error: validationError });
-    await pool.query(
-      `INSERT INTO athlete_data (
-        athlete_id, log_date, position, forty_yard_dash, agility_time, vertical_jump,
-        sleep_hours, hrv, rpe_score, stress_level, training_load, completion_rate,
-        form_quality_score, weather, equipment_available, feedback
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-      ON CONFLICT (athlete_id, log_date) DO UPDATE SET
-        position=EXCLUDED.position, forty_yard_dash=EXCLUDED.forty_yard_dash, agility_time=EXCLUDED.agility_time,
-        vertical_jump=EXCLUDED.vertical_jump, sleep_hours=EXCLUDED.sleep_hours, hrv=EXCLUDED.hrv,
-        rpe_score=EXCLUDED.rpe_score, stress_level=EXCLUDED.stress_level, training_load=EXCLUDED.training_load,
-        completion_rate=EXCLUDED.completion_rate, form_quality_score=EXCLUDED.form_quality_score,
-        weather=EXCLUDED.weather, equipment_available=EXCLUDED.equipment_available, feedback=EXCLUDED.feedback,
-        created_at=NOW()`,
-      [
-        d.athlete_id, d.log_date, d.position, d.forty_yard_dash, d.agility_time, d.vertical_jump,
-        d.sleep_hours, d.hrv, d.rpe_score, d.stress_level, d.training_load, d.completion_rate,
-        d.form_quality_score, d.weather, d.equipment_available, d.feedback
-      ]
-    );
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+const app = express()
+const server = createServer(app)
+const io = new Server(server, {
+  cors: {
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://yourdomain.com'] 
+      : ['http://localhost:3000', 'http://localhost:5173'],
+    methods: ['GET', 'POST']
   }
-});
+})
 
-// Log recommendation engagement
-app.post('/api/athlete/recommendation', async (req, res) => {
-  try {
-    const d = req.body;
-    if (!d.athlete_id || !d.log_date || !d.recommendation_type) return res.status(400).json({ error: 'Missing required fields' });
-    await pool.query(
-      `INSERT INTO ai_recommendation_logs (
-        athlete_id, log_date, recommendation_type, recommendation_value, accepted, engagement_score
-      ) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [
-        d.athlete_id, d.log_date, d.recommendation_type,
-        d.recommendation_value, d.accepted, d.engagement_score
-      ]
-    );
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      connectSrc: ["'self'", "http://127.0.0.1:8090"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https:"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"]
+    }
   }
-});
+}))
 
-// Get latest athlete data
-app.get('/api/athlete/data/:id', async (req, res) => {
-  try {
-    const { rows } = await pool.query(
-      `SELECT * FROM athlete_data WHERE athlete_id = $1 ORDER BY log_date DESC LIMIT 1`, [req.params.id]
-    );
-    res.json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://yourdomain.com'] 
+    : ['http://localhost:3000', 'http://localhost:5173'],
+  credentials: true
+}))
 
-// Get athlete profile
-app.get('/api/athlete/profile/:id', async (req, res) => {
-  try {
-    const { rows } = await pool.query(
-      `SELECT * FROM athlete_profiles WHERE id = $1`, [req.params.id]
-    );
-    res.json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+})
+app.use('/api/', limiter)
 
-// Add a test athlete (for demo)
-app.post('/api/athlete/profile', async (req, res) => {
-  try {
-    const { name, position } = req.body;
-    if (!name || !position) return res.status(400).json({ error: 'Missing name or position' });
-    const { rows } = await pool.query(
-      `INSERT INTO athlete_profiles (name, position) VALUES ($1, $2) RETURNING *`, [name, position]
-    );
-    res.json(rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+// Compression
+app.use(compression())
 
-// Health check
-app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+// Body parsing
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`API running on port ${PORT}`)); 
+// Static files - serve React app
+app.use(express.static(join(__dirname, 'react-flagfootball-app', 'dist')))
+
+// API routes
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id)
+
+  socket.on('join-room', (room) => {
+    socket.join(room)
+    console.log(`User ${socket.id} joined room: ${room}`)
+  })
+
+  socket.on('leave-room', (room) => {
+    socket.leave(room)
+    console.log(`User ${socket.id} left room: ${room}`)
+  })
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id)
+  })
+})
+
+// Serve React app for all routes
+app.get('*', (req, res) => {
+  res.sendFile(join(__dirname, 'react-flagfootball-app', 'dist', 'index.html'))
+})
+
+const PORT = process.env.PORT || 3000
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`)
+})
+
+export { app, io } 
