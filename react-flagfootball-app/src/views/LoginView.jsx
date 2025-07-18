@@ -8,7 +8,7 @@ import GearxproLogo from '../assets/logos/gearxpro-original.png';
 const LoginView = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, error: authError, clearError, isLoading } = usePocket();
+  const { login, error: authError, clearError, isLoading, isDemoMode } = usePocket();
   
   const [formData, setFormData] = useState({
     email: '',
@@ -111,9 +111,44 @@ const LoginView = () => {
     }
   }, []); // Remove clearError dependency to prevent re-renders
 
+  const handleDemoLogin = async () => {
+    try {
+      await login('demo@flagfit.com', 'demo123');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Demo login failed:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {isDemoMode && (
+          <div className="rounded-md bg-blue-50 p-4 border border-blue-200">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-blue-800">Demo Mode Active</h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p>Use any email/password or click the demo button below to explore the training features.</p>
+                </div>
+                <div className="mt-4">
+                  <button
+                    onClick={handleDemoLogin}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200"
+                  >
+                    Quick Demo Access
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to FlagFit Pro
