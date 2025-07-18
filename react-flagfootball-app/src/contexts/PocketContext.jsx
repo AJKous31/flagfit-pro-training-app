@@ -4,6 +4,9 @@ import { createContext, useState, useEffect, useMemo, useCallback, useContext } 
 export const PocketContext = createContext(null);
 
 export function PocketProvider({ children }) {
+  // Demo mode flag - when true, bypasses authentication
+  const isDemoMode = !import.meta.env.VITE_POCKETBASE_URL || import.meta.env.VITE_POCKETBASE_URL.includes('your-pocketbase-instance');
+  
   // Create PocketBase instance ONCE and reuse it
   const pb = useMemo(() => {
     // Use environment variable or fallback to localhost for development
@@ -98,6 +101,25 @@ export function PocketProvider({ children }) {
     setError(null);
     
     try {
+      // Demo mode - simulate successful login
+      if (isDemoMode) {
+        console.log('Demo mode: Simulating login for:', email);
+        const demoUser = {
+          id: 'demo-user-123',
+          email: email,
+          name: 'Demo User',
+          verified: true
+        };
+        const demoToken = 'demo-token-' + Date.now();
+        
+        // Simulate auth store update
+        setToken(demoToken);
+        setUser(demoUser);
+        localStorage.setItem('pocketbase_auth', JSON.stringify({ token: demoToken, model: demoUser }));
+        
+        return { token: demoToken, record: demoUser };
+      }
+      
       console.log('PocketContext: Attempting login for:', email);
       
       // This will automatically update authStore and trigger onChange
@@ -116,13 +138,29 @@ export function PocketProvider({ children }) {
     } finally {
       setIsLoading(false);
     }
-  }, [pb]);
+  }, [pb, isDemoMode]);
 
   const register = useCallback(async (userData) => {
     setIsLoading(true);
     setError(null);
     
     try {
+      // Demo mode - simulate successful registration
+      if (isDemoMode) {
+        console.log('Demo mode: Simulating registration for:', userData.email);
+        const demoUser = {
+          id: 'demo-user-' + Date.now(),
+          email: userData.email,
+          name: `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 'Demo User',
+          verified: true
+        };
+        
+        return {
+          user: demoUser,
+          requiresLogin: true
+        };
+      }
+      
       console.log('PocketContext: Attempting registration for:', userData.email);
       
       // Create user account
@@ -153,7 +191,7 @@ export function PocketProvider({ children }) {
     } finally {
       setIsLoading(false);
     }
-  }, [pb]);
+  }, [pb, isDemoMode]);
 
   const logout = useCallback(async (invalidateTokens = false) => {
     console.log('PocketContext: Logging out', { invalidateTokens });
@@ -219,13 +257,14 @@ export function PocketProvider({ children }) {
     isLoading,
     error,
     isInitialized,
-    isAuthenticated: !!token && pb.authStore.isValid,
+    isAuthenticated: !!token && (isDemoMode || pb.authStore.isValid),
+    isDemoMode,
     login,
     register,
     logout,
     updateProfile,
     clearError
-  }), [pb, token, user, isLoading, error, isInitialized, login, register, logout, updateProfile, clearError]);
+  }), [pb, token, user, isLoading, error, isInitialized, isDemoMode, login, register, logout, updateProfile, clearError]);
 
   return (
     <PocketContext.Provider value={value}>

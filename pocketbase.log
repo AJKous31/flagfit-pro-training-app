@@ -856,3 +856,41 @@ ERROR POST /api/collections/_pb_users_auth_/auth-with-password
 [0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2025-07-18 21:30:35.180Z')
 [0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-18 21:57:35.180Z')
 [0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-18 21:30:35.180Z')
+File pb_hooks/auth.pb.js changed, restarting...
+2025/07/19 00:10:00 [AUTH_HOOKS] Authentication logging enabled for PocketBase v0.26.1
+[1.00ms] CREATE TABLE IF NOT EXISTS `_migrations` (file VARCHAR(255) PRIMARY KEY NOT NULL, applied INTEGER NOT NULL)
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_aux_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233556_v0.23_migrate.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233557_v0.23_migrate2.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233558_v0.23_migrate3.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233559_v0.23_migrate4.go' LIMIT 1
+[0.00ms] SELECT `_collections`.* FROM `_collections` ORDER BY `created` ASC
+[0.00ms] SELECT `_params`.* FROM `_params` WHERE `id`='settings'
+[0.00ms] SELECT `_collections`.* FROM `_collections` ORDER BY `created` ASC
+[0.00ms] CREATE TABLE IF NOT EXISTS `_migrations` (file VARCHAR(255) PRIMARY KEY NOT NULL, applied INTEGER NOT NULL)
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_aux_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1640988000_init.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233556_v0.23_migrate.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233557_v0.23_migrate2.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233558_v0.23_migrate3.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1717233559_v0.23_migrate4.go' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752507852_created_training_sessions.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752507942_created_Field_1.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752507976_created_field_2.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752507995_created_field_3.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752508016_created_field_4.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752508035_created_Field_5.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752508049_deleted_training_sessions.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752511641_created_training_goals.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752511674_created_analytics_events.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752511674_created_training_sessions.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752512629_updated_analytics_events.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752512629_updated_training_goals.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752512629_updated_training_sessions.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='1752512629_updated_users.js' LIMIT 1
+[0.00ms] SELECT (1) FROM `_migrations` WHERE `file`='auth_performance_indexes.js' LIMIT 1
+2025/07/19 00:10:00 Server started at http://127.0.0.1:8090
+├─ REST API:  http://127.0.0.1:8090/api/
+└─ Dashboard: http://127.0.0.1:8090/_/
+[0.00ms] SELECT count(*) FROM `_superusers` WHERE NOT (`email`='__pbinstaller@example.com')
