@@ -20,6 +20,8 @@ const DashboardView = lazy(() => import('./views/DashboardView'));
 const TrainingView = lazy(() => import('./views/TrainingView'));
 const ProfileView = lazy(() => import('./views/ProfileView'));
 const OnboardingView = lazy(() => import('./views/OnboardingView'));
+const TournamentsView = lazy(() => import('./views/TournamentsView'));
+const CommunityView = lazy(() => import('./views/CommunityView'));
 
 // Protected Route Component (must be inside AuthProvider)
 const ProtectedRoute = ({ children }) => {
@@ -113,12 +115,28 @@ const AppRoutes = () => {
               </ProtectedRoute>
             } 
           />
+          <Route 
+            path="/tournaments" 
+            element={
+              <ProtectedRoute>
+                <TournamentsView />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/community" 
+            element={
+              <ProtectedRoute>
+                <CommunityView />
+              </ProtectedRoute>
+            } 
+          />
           
           {/* Default redirect */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           
-          {/* 404 route */}
-          <Route path="*" element={<div>Page not found</div>} />
+          {/* 404 route - redirect to dashboard */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </Suspense>
     </Router>

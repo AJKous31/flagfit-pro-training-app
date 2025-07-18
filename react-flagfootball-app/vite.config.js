@@ -9,12 +9,14 @@ export default defineConfig({
   },
   server: {
     port: 4000,
-    host: '127.0.0.1',
+    host: 'localhost',
     strictPort: true,
     hmr: {
       port: 4001,
-      host: '127.0.0.1'
-    }
+      host: 'localhost'
+    },
+    historyApiFallback: true,
+    open: true
   },
   build: {
     outDir: 'dist',

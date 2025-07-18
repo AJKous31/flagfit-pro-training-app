@@ -5,13 +5,32 @@ export const PocketContext = createContext(null);
 
 export function PocketProvider({ children }) {
   // Create PocketBase instance ONCE and reuse it
-  const pb = useMemo(() => new PocketBase(import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090'), []);
+  const pb = useMemo(() => {
+    // Use environment variable or fallback to localhost for development
+    const pocketbaseUrl = import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090';
+    const instance = new PocketBase(pocketbaseUrl);
+    
+    // Load persisted auth from localStorage on initialization
+    const savedAuth = localStorage.getItem('pocketbase_auth');
+    if (savedAuth) {
+      try {
+        const authData = JSON.parse(savedAuth);
+        instance.authStore.save(authData.token, authData.model);
+      } catch (error) {
+        console.warn('Failed to load persisted auth:', error);
+        localStorage.removeItem('pocketbase_auth');
+      }
+    }
+    
+    return instance;
+  }, []);
 
   // Sync React state with PocketBase authStore
   const [token, setToken] = useState(pb.authStore.token);
   const [user, setUser] = useState(pb.authStore.model);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Subscribe to authStore changes to keep React state in sync
   useEffect(() => {
@@ -19,9 +38,40 @@ export function PocketProvider({ children }) {
       console.log('PocketBase authStore changed:', { hasToken: !!token, userEmail: model?.email });
       setToken(token);
       setUser(model);
+      
+      // Persist auth state to localStorage
+      if (token && model) {
+        localStorage.setItem('pocketbase_auth', JSON.stringify({ token, model }));
+      } else {
+        localStorage.removeItem('pocketbase_auth');
+      }
     });
 
     return unsubscribe;
+  }, [pb]);
+
+  // Initialize and validate auth on mount
+  useEffect(() => {
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      
+      try {
+        // If we have a token, validate it with a refresh call
+        if (pb.authStore.isValid) {
+          console.log('Validating existing auth token...');
+          await pb.collection('_pb_users_auth_').authRefresh();
+          console.log('Auth token validated successfully');
+        }
+      } catch (error) {
+        console.warn('Auth validation failed, clearing invalid token:', error);
+        pb.authStore.clear();
+      } finally {
+        setIsInitialized(true);
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, [pb]);
 
   // Auto-refresh token every 2 minutes if valid
@@ -105,8 +155,18 @@ export function PocketProvider({ children }) {
     }
   }, [pb]);
 
-  const logout = useCallback(() => {
-    console.log('PocketContext: Logging out');
+  const logout = useCallback(async (invalidateTokens = false) => {
+    console.log('PocketContext: Logging out', { invalidateTokens });
+    
+    try {
+      // If requested, invalidate all tokens server-side (useful after password changes)
+      if (invalidateTokens && pb.authStore.isValid) {
+        await pb.collection('_pb_users_auth_').authRefresh({ invalidate: true });
+      }
+    } catch (error) {
+      console.warn('Failed to invalidate tokens during logout:', error);
+    }
+    
     pb.authStore.clear(); // This will trigger onChange and clear React state
     setError(null);
   }, [pb]);
@@ -118,8 +178,21 @@ export function PocketProvider({ children }) {
     try {
       console.log('PocketContext: Updating profile');
       
+      const hasPasswordChange = profileData.password && profileData.passwordConfirm;
+      const hasEmailChange = profileData.email && profileData.email !== user?.email;
+      
       // Update user profile via PocketBase
       const record = await pb.collection('_pb_users_auth_').update(pb.authStore.model.id, profileData);
+      
+      // If password or email changed, invalidate other sessions for security
+      if (hasPasswordChange || hasEmailChange) {
+        console.log('Password/email changed, invalidating other sessions...');
+        try {
+          await pb.collection('_pb_users_auth_').authRefresh({ invalidate: true });
+        } catch (refreshError) {
+          console.warn('Failed to invalidate other sessions:', refreshError);
+        }
+      }
       
       // The authStore should update automatically, but we can force it
       setUser(record);
@@ -133,7 +206,7 @@ export function PocketProvider({ children }) {
     } finally {
       setIsLoading(false);
     }
-  }, [pb]);
+  }, [pb, user?.email]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -145,13 +218,14 @@ export function PocketProvider({ children }) {
     user,
     isLoading,
     error,
+    isInitialized,
     isAuthenticated: !!token && pb.authStore.isValid,
     login,
     register,
     logout,
     updateProfile,
     clearError
-  }), [pb, token, user, isLoading, error, login, register, logout, updateProfile, clearError]);
+  }), [pb, token, user, isLoading, error, isInitialized, login, register, logout, updateProfile, clearError]);
 
   return (
     <PocketContext.Provider value={value}>

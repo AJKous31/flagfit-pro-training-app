@@ -61,10 +61,6 @@ class AnalyticsService {
    * @returns {Promise<Array>} - Array of events
    */
   async getEvents(filters = {}) {
-    const cacheKey = `analytics:events:${JSON.stringify(filters)}`;
-    const cached = cacheService.get(cacheKey);
-    if (cached) return cached;
-
     try {
       // Check if user is authenticated
       const pocketbase = this._getPocketbase();
@@ -72,6 +68,10 @@ class AnalyticsService {
         console.log('User not authenticated, returning empty analytics events');
         return [];
       }
+
+      const cacheKey = `analytics:events:${JSON.stringify(filters)}`;
+      const cached = cacheService.get(cacheKey);
+      if (cached) return cached;
 
       const options = {
         page: filters.page || 1,
@@ -90,12 +90,9 @@ class AnalyticsService {
       cacheService.set(cacheKey, result.data, 2 * 60 * 1000); // 2 minutes
       return result.data;
     } catch (error) {
-      console.error('Analytics events service error:', error.message);
-      // Return empty array for auth errors, throw for actual API errors
-      if (error.message.includes('User not authenticated') || error.message.includes('401')) {
-        return [];
-      }
-      throw error;
+      console.warn('Analytics events service error (returning empty array):', error.message);
+      // Always return empty array for any error to prevent app crashes
+      return [];
     }
   }
 
@@ -105,11 +102,11 @@ class AnalyticsService {
    * @returns {Promise<Object>} - Metrics object
    */
   async getMetrics(timeframe = '7d') {
-    const cacheKey = `analytics:metrics:${timeframe}`;
-    const cached = cacheService.get(cacheKey);
-    if (cached) return cached;
-
     try {
+      const cacheKey = `analytics:metrics:${timeframe}`;
+      const cached = cacheService.get(cacheKey);
+      if (cached) return cached;
+
       const startDate = this.getStartDateForTimeframe(timeframe);
       const filter = startDate ? `timestamp >= "${startDate.toISOString()}"` : '';
       
@@ -125,7 +122,13 @@ class AnalyticsService {
       cacheService.set(cacheKey, metrics, 5 * 60 * 1000); // 5 minutes
       return metrics;
     } catch (error) {
-      throw new Error(`Failed to fetch metrics: ${error.message}`);
+      console.warn('Analytics metrics service error (returning empty metrics):', error.message);
+      return {
+        pageViews: 0,
+        uniqueUsers: 0,
+        sessionDuration: 0,
+        conversionRate: 0
+      };
     }
   }
 
@@ -182,11 +185,11 @@ class AnalyticsService {
    * @returns {Promise<Object>} - User behavior data
    */
   async getUserBehavior(filters = {}) {
-    const cacheKey = `analytics:behavior:${JSON.stringify(filters)}`;
-    const cached = cacheService.get(cacheKey);
-    if (cached) return cached;
-
     try {
+      const cacheKey = `analytics:behavior:${JSON.stringify(filters)}`;
+      const cached = cacheService.get(cacheKey);
+      if (cached) return cached;
+
       const events = await this.getEvents({ ...filters, eventType: 'page_view' });
 
       const behavior = {
@@ -198,7 +201,12 @@ class AnalyticsService {
       cacheService.set(cacheKey, behavior, 10 * 60 * 1000); // 10 minutes
       return behavior;
     } catch (error) {
-      throw new Error(`Failed to fetch user behavior: ${error.message}`);
+      console.warn('Analytics user behavior service error (returning empty behavior):', error.message);
+      return {
+        mostVisitedPages: [],
+        userJourney: [],
+        dropoffPoints: []
+      };
     }
   }
 
@@ -310,11 +318,11 @@ class AnalyticsService {
    * @returns {Promise<Object>} - Performance metrics
    */
   async getPerformance(timeframe = '7d') {
-    const cacheKey = `analytics:performance:${timeframe}`;
-    const cached = cacheService.get(cacheKey);
-    if (cached) return cached;
-
     try {
+      const cacheKey = `analytics:performance:${timeframe}`;
+      const cached = cacheService.get(cacheKey);
+      if (cached) return cached;
+
       const events = await this.getEvents({ 
         eventType: 'performance',
         timeframe 
@@ -329,7 +337,12 @@ class AnalyticsService {
       cacheService.set(cacheKey, performance, 5 * 60 * 1000); // 5 minutes
       return performance;
     } catch (error) {
-      throw new Error(`Failed to fetch performance: ${error.message}`);
+      console.warn('Analytics performance service error (returning empty performance):', error.message);
+      return {
+        loadTimes: [],
+        errorRates: [],
+        apiResponseTimes: []
+      };
     }
   }
 
