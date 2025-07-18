@@ -6,17 +6,16 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "dev": "cd react-flagfootball-app && npm run dev",
-    "build": "cd react-flagfootball-app && npm run build",
-    "preview": "cd react-flagfootball-app && npm run preview",
+    "dev": "cd react-flagfootball-app && npm install && npm run dev",
+    "build": "cd react-flagfootball-app && npm install && npm run build",
+    "preview": "cd react-flagfootball-app && npm install && npm run preview",
     "lint": "cd react-flagfootball-app && npm run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "cd react-flagfootball-app && npm run test",
     "pocketbase": "./pocketbase serve --dev --dir=./pb_data",
-    "stress-test": "artillery run stress-test.yml",
+    "pocketbase:admin": "./pocketbase admin create --dir=./pb_data",
     "stress-test:pocketbase": "artillery run pocketbase-stress-test.yml",
-    "stress-test:frontend": "artillery run frontend-stress-test.yml",
     "audit": "npm audit"
   },
   "lint-staged": {

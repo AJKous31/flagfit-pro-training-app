@@ -57,8 +57,13 @@ A comprehensive Progressive Web App (PWA) for flag football training management 
 4. **Start PocketBase (in project root)**
    ```bash
    cd ..
-   ./pocketbase serve --dev --dir=./pb_data
+   npm run pocketbase
    ```
+   
+   **Development Mode Benefits:**
+   - Real-time SQL logging for debugging auth issues
+   - Detailed request/response logging
+   - Auto-migration on schema changes
 
 5. **Start React App**
    ```bash
@@ -106,6 +111,14 @@ flagfit-pro-training-app/
 
 ## 🔐 Authentication
 
+### Enhanced Security Features (v0.22.21+)
+- **Token Persistence**: Automatic localStorage sync with validation on app mount
+- **Session Management**: Smart token refresh with 2-minute auto-renewal
+- **Security Hardening**: Rate limiting (5 attempts per 15 minutes per IP)
+- **Email Verification**: Optional `onlyVerified` flag enforcement
+- **Session Invalidation**: Automatic token revocation on password/email changes
+- **Performance Optimized**: Composite indexes on (email, verified) for sub-100ms auth
+
 ### Test Credentials
 - **Email**: `demo@flagfit.com`
 - **Password**: `password123`
@@ -114,6 +127,12 @@ flagfit-pro-training-app/
 - **Athletes**: Access training programs and track progress
 - **Coaches**: Manage teams and assign programs
 - **Admins**: Full system administration access
+
+### Authentication Flow
+1. **Login**: Email/password with automatic token persistence
+2. **Token Validation**: On app mount, validates existing tokens via `/auth-refresh`
+3. **Auto-Refresh**: Background token renewal every 2 minutes
+4. **Logout**: Secure token clearing with optional server-side invalidation
 
 ## 🗄️ Database
 
@@ -150,7 +169,6 @@ npm run test
 ### Stress Testing
 ```bash
 npm run stress-test:pocketbase
-npm run stress-test:frontend
 ```
 
 ## 📝 Contributing
