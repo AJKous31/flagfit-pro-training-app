@@ -9,6 +9,7 @@ import DrillDetail from '../components/DrillDetail';
 import TrainingCalendar from '../components/TrainingCalendar';
 import ProgressTracker from '../components/ProgressTracker';
 import WeeklyChallenges from '../components/WeeklyChallenges';
+import OfflineWorkouts from '../components/OfflineWorkouts';
 
 const TrainingView = () => {
   const { user } = usePocket();
@@ -27,6 +28,7 @@ const TrainingView = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [showProgressTracker, setShowProgressTracker] = useState(false);
   const [showWeeklyChallenges, setShowWeeklyChallenges] = useState(false);
+  const [showOfflineWorkouts, setShowOfflineWorkouts] = useState(false);
   const [scheduledWorkouts, setScheduledWorkouts] = useState([]);
   const [biometricRecommendations, setBiometricRecommendations] = useState([]);
   const videoRef = useRef(null);
@@ -273,6 +275,13 @@ const TrainingView = () => {
     );
   }
 
+  // Show offline workouts if active
+  if (showOfflineWorkouts) {
+    return (
+      <OfflineWorkouts onBack={() => setShowOfflineWorkouts(false)} />
+    );
+  }
+
   // Show training session if active
   if (showTrainingSession) {
     return (
@@ -357,6 +366,15 @@ const TrainingView = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>Challenges</span>
+              </button>
+              <button
+                onClick={() => setShowOfflineWorkouts(true)}
+                className="flex items-center space-x-2 bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg font-semibold transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Offline</span>
               </button>
               <div className="text-right">
                 <div className="text-sm text-blue-200">Current Streak</div>
