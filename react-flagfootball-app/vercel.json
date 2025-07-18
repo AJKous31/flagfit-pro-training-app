@@ -5,10 +5,10 @@
       "destination": "/index.html"
     }
   ],
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm ci",
   "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
   "functions": {},
   "headers": [
     {
