@@ -5,13 +5,32 @@ export const PocketContext = createContext(null);
 
 export function PocketProvider({ children }) {
   // Demo mode flag - when true, bypasses authentication
-  const isDemoMode = !import.meta.env.VITE_POCKETBASE_URL || import.meta.env.VITE_POCKETBASE_URL.includes('your-pocketbase-instance');
+  const pocketbaseUrl = import.meta.env.VITE_POCKETBASE_URL;
+  const isProduction = import.meta.env.PROD;
+  const isDemoMode = !pocketbaseUrl || 
+    pocketbaseUrl.includes('your-pocketbase-instance') ||
+    pocketbaseUrl.includes('127.0.0.1') ||
+    pocketbaseUrl.includes('localhost') ||
+    isProduction; // Always use demo mode in production unless explicitly configured
+  
+  console.log('PocketContext initialization:', {
+    pocketbaseUrl,
+    isProduction,
+    isDemoMode,
+    env: import.meta.env.MODE
+  });
   
   // Create PocketBase instance ONCE and reuse it
   const pb = useMemo(() => {
+    // In demo mode, create a dummy instance that won't try to connect
+    if (isDemoMode) {
+      console.log('Demo mode: Creating dummy PocketBase instance');
+      return new PocketBase('https://demo.example.com'); // Dummy URL
+    }
+    
     // Use environment variable or fallback to localhost for development
-    const pocketbaseUrl = import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090';
-    const instance = new PocketBase(pocketbaseUrl);
+    const finalUrl = pocketbaseUrl || 'http://127.0.0.1:8090';
+    const instance = new PocketBase(finalUrl);
     
     // Load persisted auth from localStorage on initialization
     const savedAuth = localStorage.getItem('pocketbase_auth');
@@ -26,17 +45,48 @@ export function PocketProvider({ children }) {
     }
     
     return instance;
-  }, []);
+  }, [isDemoMode, pocketbaseUrl]);
 
-  // Sync React state with PocketBase authStore
-  const [token, setToken] = useState(pb.authStore.token);
-  const [user, setUser] = useState(pb.authStore.model);
+  // Sync React state with PocketBase authStore (or demo state)
+  const [token, setToken] = useState(() => {
+    if (isDemoMode) {
+      const savedAuth = localStorage.getItem('pocketbase_auth');
+      if (savedAuth) {
+        try {
+          return JSON.parse(savedAuth).token;
+        } catch (error) {
+          return null;
+        }
+      }
+      return null;
+    }
+    return pb.authStore.token;
+  });
+  const [user, setUser] = useState(() => {
+    if (isDemoMode) {
+      const savedAuth = localStorage.getItem('pocketbase_auth');
+      if (savedAuth) {
+        try {
+          return JSON.parse(savedAuth).model;
+        } catch (error) {
+          return null;
+        }
+      }
+      return null;
+    }
+    return pb.authStore.model;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Subscribe to authStore changes to keep React state in sync
+  // Subscribe to authStore changes to keep React state in sync (skip in demo mode)
   useEffect(() => {
+    if (isDemoMode) {
+      console.log('Demo mode: Skipping authStore subscription');
+      return;
+    }
+    
     const unsubscribe = pb.authStore.onChange((token, model) => {
       console.log('PocketBase authStore changed:', { hasToken: !!token, userEmail: model?.email });
       setToken(token);
@@ -51,7 +101,7 @@ export function PocketProvider({ children }) {
     });
 
     return unsubscribe;
-  }, [pb]);
+  }, [pb, isDemoMode]);
 
   // Initialize and validate auth on mount
   useEffect(() => {
