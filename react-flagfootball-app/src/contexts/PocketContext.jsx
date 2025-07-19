@@ -7,11 +7,20 @@ export function PocketProvider({ children }) {
   // Demo mode flag - when true, bypasses authentication
   const pocketbaseUrl = import.meta.env.VITE_POCKETBASE_URL;
   const isProduction = import.meta.env.PROD;
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  
+  // Force demo mode in multiple scenarios
+  const isDemoMode = true; // FORCE DEMO MODE FOR NOW
+  /* 
+  Original logic:
   const isDemoMode = !pocketbaseUrl || 
     pocketbaseUrl.includes('your-pocketbase-instance') ||
     pocketbaseUrl.includes('127.0.0.1') ||
     pocketbaseUrl.includes('localhost') ||
-    isProduction; // Always use demo mode in production unless explicitly configured
+    isProduction ||
+    hostname.includes('vercel.app') ||
+    hostname.includes('netlify.app');
+  */
   
   console.log('PocketContext initialization:', {
     pocketbaseUrl,
