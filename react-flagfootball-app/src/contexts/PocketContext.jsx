@@ -4,9 +4,16 @@ import { createContext, useState, useEffect, useMemo, useCallback, useContext } 
 export const PocketContext = createContext(null);
 
 export function PocketProvider({ children }) {
-  // BUILD IDENTIFIER FOR DEPLOYMENT VERIFICATION
-  const BUILD_ID = 'EMERGENCY_DEMO_FIX_v2_' + Date.now();
-  console.log('🚀 Build ID:', BUILD_ID);
+  // BUILD IDENTIFIER FOR DEPLOYMENT VERIFICATION - FORCE CACHE BUST
+  const BUILD_ID = 'EMERGENCY_DEMO_FIX_v3_FINAL_' + Date.now();
+  console.log('🚀🚀🚀 FINAL BUILD ID:', BUILD_ID);
+  
+  // Force cache busting in browser
+  if (typeof window !== 'undefined') {
+    console.log('🌐 Current URL:', window.location.href);
+    console.log('🌐 User Agent:', navigator.userAgent);
+    document.title = `FlagFit Pro - Build ${BUILD_ID.substring(BUILD_ID.length - 10)}`;
+  }
   
   // Demo mode flag - when true, bypasses authentication
   const pocketbaseUrl = import.meta.env.VITE_POCKETBASE_URL;
