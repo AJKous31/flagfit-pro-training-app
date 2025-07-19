@@ -59,6 +59,14 @@ export function PocketProvider({ children }) {
       setIsLoading(true);
       
       try {
+        // Skip validation in demo mode
+        if (isDemoMode) {
+          console.log('Demo mode: Skipping auth validation');
+          setIsInitialized(true);
+          setIsLoading(false);
+          return;
+        }
+        
         // If we have a token, validate it with a refresh call
         if (pb.authStore.isValid) {
           console.log('Validating existing auth token...');
@@ -75,10 +83,14 @@ export function PocketProvider({ children }) {
     };
 
     initializeAuth();
-  }, [pb]);
+  }, [pb, isDemoMode]);
 
-  // Auto-refresh token every 2 minutes if valid
+  // Auto-refresh token every 2 minutes if valid (skip in demo mode)
   useEffect(() => {
+    if (isDemoMode) {
+      return; // No need to refresh tokens in demo mode
+    }
+    
     const refreshInterval = setInterval(async () => {
       if (pb.authStore.isValid) {
         try {
@@ -93,7 +105,7 @@ export function PocketProvider({ children }) {
     }, 120000); // 2 minutes
 
     return () => clearInterval(refreshInterval);
-  }, [pb]);
+  }, [pb, isDemoMode]);
 
   // Actions
   const login = useCallback(async (email, password) => {
@@ -194,7 +206,16 @@ export function PocketProvider({ children }) {
   }, [pb, isDemoMode]);
 
   const logout = useCallback(async (invalidateTokens = false) => {
-    console.log('PocketContext: Logging out', { invalidateTokens });
+    console.log('PocketContext: Logging out', { invalidateTokens, isDemoMode });
+    
+    // In demo mode, just clear local state
+    if (isDemoMode) {
+      setToken(null);
+      setUser(null);
+      localStorage.removeItem('pocketbase_auth');
+      setError(null);
+      return;
+    }
     
     try {
       // If requested, invalidate all tokens server-side (useful after password changes)
@@ -207,7 +228,7 @@ export function PocketProvider({ children }) {
     
     pb.authStore.clear(); // This will trigger onChange and clear React state
     setError(null);
-  }, [pb]);
+  }, [pb, isDemoMode]);
 
   const updateProfile = useCallback(async (profileData) => {
     setIsLoading(true);

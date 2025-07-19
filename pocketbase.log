@@ -894,3 +894,21 @@ File pb_hooks/auth.pb.js changed, restarting...
 ├─ REST API:  http://127.0.0.1:8090/api/
 └─ Dashboard: http://127.0.0.1:8090/_/
 [0.00ms] SELECT count(*) FROM `_superusers` WHERE NOT (`email`='__pbinstaller@example.com')
+[4.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `created` ASC
+[4.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `created` ASC
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2025-07-19 00:57:03.534Z')
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-19 00:57:03.534Z')
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2025-07-19 00:30:03.534Z')
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-19 00:30:03.534Z')
+[4.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `created` ASC
+[5.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `created` ASC
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2025-07-19 02:57:45.842Z')
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-19 02:57:45.842Z')
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2025-07-19 02:30:45.843Z')
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-19 02:30:45.844Z')
+[9.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `created` ASC
+[9.00ms] SELECT `_collections`.* FROM `_collections` WHERE `type`='auth' ORDER BY `created` ASC
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2025-07-19 06:57:34.426Z')
+[0.00ms] SELECT `_otps`.* FROM `_otps` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-19 06:57:34.426Z')
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='_pb_users_auth_') AND (`created` < '2025-07-19 06:30:34.426Z')
+[0.00ms] SELECT `_mfas`.* FROM `_mfas` WHERE (`collectionRef`='pbc_3142635823') AND (`created` < '2025-07-19 06:30:34.427Z')

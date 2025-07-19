@@ -208,7 +208,7 @@ const CommunityHub = ({ onClose }) => {
 
               {post.content && (
                 <p className="text-white bg-blue-600/20 p-3 rounded-lg mb-3 italic">
-                  "{post.content}"
+                  &ldquo;{post.content}&rdquo;
                 </p>
               )}
 

@@ -644,7 +644,7 @@ const DashboardView = React.memo(function DashboardView() {
     if (selectedTraining) {
       const newExercise = {
         name: exerciseName,
-        duration: duration,
+        duration,
         completed: false,
         custom: true
       };
