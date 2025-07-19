@@ -132,16 +132,17 @@ const LoginView = () => {
                 </svg>
               </div>
               <div className="ml-3 flex-1">
-                <h3 className="text-sm font-medium text-blue-800">Demo Mode Active</h3>
+                <h3 className="text-sm font-medium text-blue-800">🚨 Demo Mode Active - Emergency Fix v2</h3>
                 <div className="mt-2 text-sm text-blue-700">
-                  <p>Use any email/password or click the demo button below to explore the training features.</p>
+                  <p>✅ Authentication bypassed - Use any email/password or click demo button.</p>
+                  <p className="text-xs text-blue-600 mt-1">Build: {new Date().toISOString()}</p>
                 </div>
                 <div className="mt-4">
                   <button
                     onClick={handleDemoLogin}
                     className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors duration-200"
                   >
-                    Quick Demo Access
+                    🚀 Quick Demo Access
                   </button>
                 </div>
               </div>
